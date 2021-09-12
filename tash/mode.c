@@ -1,16 +1,20 @@
-#include <defs.h>
-#include <cmd.h>
+#define _GNU_SOURCE
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include "defs.h"
+#include "cmd.h"
 
 void interactive() {
-				while (true)
+				while (1)
 				{
-								// Print the prompt in interactive mode
+								struct command* cmd = malloc( sizeof(struct command) );
+								char* line = NULL;
+								size_t len = 0;
+
 								prompt();
 
-								// parse the command
-								command cmd*;
-								if (parse(getline(), cmd) == 0) {
-												// run the command
+								if ((getline(&line, &len, stdin) != -1) && (parse(line, cmd) == 0)) {
 												run(cmd);
 								}
 
@@ -18,13 +22,21 @@ void interactive() {
 }
 
 
-void batchmode(int argc, int[] argv) {
-				if (argc == 1) { 
-								// for each line in file 
-								// parse the line 
-								// run the commands
+void batchmode(char* file) {
+				if (1) { 
+								FILE* fp;
+								struct command* cmd = malloc( sizeof(struct command) );
+								char* line = NULL;
+								size_t len = 0;
+
+								fp = fopen(file, "r");
+								if (fp == NULL) exit(1);
+								if ((getline(&line, &len, fp) != -1) && (parse(line, cmd) == 0)) {
+												run(cmd);
+								}
+								exit(0);
 				} else {
-								error("");
+								/* error(""); */
 								exit(1);
 				}
 }

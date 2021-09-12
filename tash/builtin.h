@@ -1,7 +1,7 @@
 #include <defs.h>
 
-void exit()
+void texit()
 
-void cd(char* args)
+void tcd(const char* args)
 
-void path(char* args)
+void tpath(const char* args)

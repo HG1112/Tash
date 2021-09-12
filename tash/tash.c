@@ -1,10 +1,11 @@
-#include <mode.h>
+#include <stdio.h>
+#include "mode.h"
 
-int main(int argc, int argv[]) {
-	if (argc == 0) {
-			interactive();
+int main(int argc, char** argv) {
+	if (argc == 2) {
+			batchmode(argv[1]);
 	} else {
-			batchmode(argc, argv);
+			interactive();
 	}
 	return 0;
 }

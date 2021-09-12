@@ -3,9 +3,9 @@
 
 typedef char* string;
 
-struct command {
+typedef struct command {
 				string path;
 				string* args;
-				command* next;
-}
-#endif // _DEFS_H_
+				struct command* next;
+} command;
+#endif

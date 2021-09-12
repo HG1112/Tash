@@ -1,15 +1,14 @@
-void exit() {
-				exit(0)
+#include <stdlib.h>
+#include <unistd.h>
+
+void texit() {
+				exit(0);
 }
 
-void path(string* paths) {
-				int n = len(paths);
-				PATH = (string) malloc(n);
-				for (int i = 0; i < n; i++) {
-								PATH[i] = *(paths+i);
-				}
+void tpath(const char** paths) {
+				return;
 }
 
-void cd(string path) {
+void tcd(const char* path) {
 				chdir(path);
 }
