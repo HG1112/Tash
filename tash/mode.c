@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "defs.h"
 #include "cmd.h"
+#include "utils.h"
 
 void interactive() {
 				while (1)
@@ -23,7 +24,7 @@ void interactive() {
 
 
 void batchmode(char* file) {
-				if (1) { 
+				if (file != NULL) { 
 								FILE* fp;
 								struct command* cmd = malloc( sizeof(struct command) );
 								char* line = NULL;
@@ -36,7 +37,7 @@ void batchmode(char* file) {
 								}
 								exit(0);
 				} else {
-								/* error(""); */
+								error("");
 								exit(1);
 				}
 }
