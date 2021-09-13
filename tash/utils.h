@@ -4,7 +4,7 @@
 
 void prompt(void);
 
-void error(char* msg)
+void error(void);
 
 int redirect_output(char* file);
 

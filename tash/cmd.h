@@ -1,7 +1,7 @@
 #ifndef _CMD_H_
 #define _CMD_H_
 
-int parse(char* line, command* cmd);
+command* parse(char* line);
 
 int run(command* cmd);
 

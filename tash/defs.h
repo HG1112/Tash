@@ -2,9 +2,8 @@
 #define _DEFS_H_
 
 typedef struct command {
-				string path;
-				string* args;
 				struct command* next;
+				char* args[];
 } command;
 
 #endif

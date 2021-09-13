@@ -1,6 +1,6 @@
 # Source, Executable, Includes, Library Defines
-INCL   = defs.h cmd.h mode.h builtin.h
-SRC    = cmd.c mode.c builtin.c tash.c
+INCL   = defs.h utils.h cmd.h mode.h builtin.h
+SRC    = utils.c cmd.c mode.c builtin.c tash.c
 OBJ    = $(SRC:.c=.o)
 	LIBS   = -lc
 	EXE    = tash

@@ -4,10 +4,12 @@ void prompt(void) {
 				printf("tash> ");
 }
 
-void error(char* msg) {
-				printf("%s\n", msg);
+void error() {
+				printf("An error has occured\n");
 }
 
 int redirect_output(char* file) {
-				freopen(file, "w+", stdout);
+				FILE* fp = freopen(file, "w+", stdout);
+				if (fp == NULL) return -1;
+				return 0;
 }
