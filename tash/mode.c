@@ -6,7 +6,7 @@
 #include "cmd.h"
 #include "utils.h"
 
-void interactive() {
+void interactive(char** PATH) {
 				while (1)
 				{
 								char* line = NULL;
@@ -15,16 +15,16 @@ void interactive() {
 								prompt();
 
 								if ((getline(&line, &len, stdin) != -1)) {
-												struct command* cmd = parse(line);
+												struct command* cmd = parse(line, PATH);
 												if (cmd == NULL) error();
-												run(cmd);
+												run(cmd, PATH);
 								}
 
 				}
 }
 
 
-void batchmode(char* file) {
+void batchmode(char* file, char** PATH) {
 				if (file != NULL) { 
 								FILE* fp = NULL;
 								char* line = NULL;
@@ -34,12 +34,11 @@ void batchmode(char* file) {
 								if (fp == NULL) exit(1);
 
 								if ((getline(&line, &len, fp) != -1)) {
-												struct command* cmd = parse(line);
+												struct command* cmd = parse(line, PATH);
 												if (cmd == NULL) error();
-												run(cmd);
+												run(cmd, PATH);
 								}
 
-								exit(0);
 				} else {
 								error();
 								exit(1);

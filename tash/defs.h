@@ -3,7 +3,7 @@
 
 typedef struct command {
 				struct command* next;
-				char* args[];
+				char** args;
 } command;
 
 #endif

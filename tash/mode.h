@@ -1,5 +1,5 @@
 
-void interactive(void);
+void interactive(char** PATH);
 
-void batchmode(char* file);
+void batchmode(char* file, char** PATH);
 

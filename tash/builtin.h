@@ -1,7 +1,5 @@
-#include <defs.h>
+void texit();
 
-void texit()
+void tcd(command* cmd);
 
-void tcd(const char* args)
-
-void tpath(const char* args)
+void tpath(char** PATH, command* cmd);
