@@ -87,7 +87,8 @@ void parse_run(char* line) {
   cmd[0] = ex;
 
   token = strtok(line, delim);
-  for (int i = 1; i < clen; i++) {
+  int i;
+  for (i=1; i < clen; i++) {
     token = strtok(NULL, delim);
     cmd[i] = token;
   }
