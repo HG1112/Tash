@@ -7,6 +7,8 @@ void error(void);
 
 int redirect_output(char* file);
 
+char* trim(char* line);
+
 void executable(char* name, char** PATH);
 
 #endif

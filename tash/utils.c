@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <ctype.h>
 
 void prompt(void) {
   printf("tash> ");
@@ -9,6 +10,17 @@ void prompt(void) {
 
 void error() {
   printf("An error has occured\n");
+}
+
+/* https://stackoverflow.com/questions/122616/how-do-i-trim-leading-trailing-whitespace-in-a-standard-way */
+char* trim(char* line) {
+  while(isspace((unsigned char) *line)) line++;
+  if (*line == 0) return line;
+  char* last = line + strlen(line) - 1;
+  while (last >= line && isspace((unsigned char) *last)) last--;
+  last[1] = '\0';
+  return line;
+
 }
 
 int redirect_output(char* file) {

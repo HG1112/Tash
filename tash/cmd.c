@@ -5,7 +5,6 @@
 #include <sys/wait.h>
 #include "defs.h"
 #include "utils.h"
-#include "builtin.h"
 
 command* parse(char* line, char** PATH) {
   const char* delim = " \n";
@@ -42,16 +41,8 @@ command* parse(char* line, char** PATH) {
 int run(command* cmd, char** PATH) {
   int parallel = 0;
   while(cmd != NULL) {
-    int child_pid = fork();
-    if (child_pid == 0) {
-      if (strcmp(cmd->args[0], "exit"))
-        texit();
-      else if (strcmp(cmd->args[0], "cd"))
-        tcd(cmd);
-      else if (strcmp(cmd->args[0], "path"))
-        tpath(PATH, cmd);
-      else if (execv(cmd->args[0], cmd->args) == -1)
-        error();
+    if (fork() == 0) {
+      if (execv(cmd->args[0], cmd->args) == -1) error();
       cmd = cmd->next;
     } else {
       cmd = cmd->next;
