@@ -10,20 +10,19 @@
 // constants
 const char* delim = " \n";
 const char* amp = "&";
+//#define paths char**
 
 // length variables
 int plen = 2;
 int clen = 0;
 
 // paths
-char** paths = malloc(plen * sizeof(char*));
-paths[0] = ".";
-paths[1] = "";
+
 
 // builtin functions
-void tcd(char** cmd);
-void texit();
-void tpath(char** cmd);
+//void tcd(char** cmd);
+//void texit();
+//void tpath(char** cmd);
 void builtin(char** cmd);
 
 // parse and run the commands
@@ -47,12 +46,18 @@ int texit() {
 
 int tpath(char** cmd) {
   if (clen < 2) return -1;
-  free(paths);
+
+   char **paths= malloc(plen * sizeof(char*));
+  paths[0] = ".";
+  paths[1] = "";
+
+ free(paths);
   plen = clen + 1;
   paths = malloc(sizeof(char*) * plen);
   paths[0] = ".";
   paths[1] = "";
-  for (int i = 1; i < clen; i++) paths[i+1] = cmd[i];
+  int i;
+  for (i = 1; i < clen; i++) paths[i+1] = cmd[i];
   return 0;
 }
 
@@ -66,9 +71,9 @@ void parse_run(char* line) {
   char*	next = NULL;
 
   token = strtok(line, delim);
-  if (token == NULL) return NULL;
+  if (token == NULL) return ;
   char* ex = executable(token);
-  if (ex == NULL) return NULL;
+  if (ex == NULL) return ;
 
   clen = 0;
   while(token != NULL) {
@@ -173,7 +178,8 @@ int redirect_output(char* file) {
 char* executable(char* name) {
   int ac = -1;
   char* ex = NULL;
-  for (int i = 0; i < plen; i++)  {
+  int i;
+  for (i = 0; i < plen; i++)  {
     ex = malloc(strlen(paths[i]) + 1 + strlen(name));
     strcpy(ex, paths[i]);
     strcat(ex, "/");
@@ -186,6 +192,7 @@ char* executable(char* name) {
 
 // Main
 int main(int argc, char** argv) {
+
   if (argc > 2) {
     error();
     exit(1);
