@@ -4,9 +4,11 @@
 
 
 int main(int argc, char** argv) {
-  char** PATH = malloc(2 * sizeof(char*));
-  PATH[0] = ".";
-  PATH[1] = "";
+  struct Path PATH;
+  PATH.paths = malloc(2 * sizeof(char*));
+  PATH.paths[0] = ".";
+  PATH.paths[1] = "";
+  PATH.len = 2;
 
 	if (argc == 2) {
 			batchmode(argv[1], PATH);

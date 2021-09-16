@@ -8,7 +8,7 @@
 #include "utils.h"
 #include "builtin.h"
 
-void interactive(char** PATH) {
+void interactive(Path PATH) {
   while (1)
   {
     char* line = NULL;
@@ -19,7 +19,7 @@ void interactive(char** PATH) {
     if (getline(&line, &len, stdin) != -1) {
       line = trim(line);
       if (*line != 0) {
-        struct command* cmd = parse(line, PATH);
+        struct Command* cmd = parse(line, PATH);
         if (cmd == NULL) error();
 
         builtin(PATH, cmd);
@@ -32,7 +32,7 @@ void interactive(char** PATH) {
 }
 
 
-void batchmode(char* file, char** PATH) {
+void batchmode(char* file, Path PATH) {
   if (file != NULL) { 
     FILE* fp = NULL;
     char* line = NULL;
@@ -44,7 +44,7 @@ void batchmode(char* file, char** PATH) {
     if (getline(&line, &len, stdin) != -1) {
       line = trim(line);
       if (*line != 0) {
-        struct command* cmd = parse(line, PATH);
+        struct Command* cmd = parse(line, PATH);
         if (cmd == NULL) error();
 
         builtin(PATH, cmd);

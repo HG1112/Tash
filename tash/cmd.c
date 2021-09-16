@@ -6,7 +6,7 @@
 #include "defs.h"
 #include "utils.h"
 
-command* parse(char* line, char** PATH) {
+Command* parse(char* line, Path PATH) {
   const char* delim = " \n";
   const char* amp = "&";
   char* token = NULL;
@@ -25,20 +25,20 @@ command* parse(char* line, char** PATH) {
   }
 
   token = strtok(line, delim);
-  struct command* cmd = malloc( sizeof(*cmd) + (len+1) * sizeof(char*) );
+  struct Command* cmd = malloc( sizeof(*cmd) + (len+1) * sizeof(char*) );
   executable(token, PATH);
   if (token == NULL) return NULL;
 
   cmd->args = malloc((len + 1) * sizeof(char*));
   cmd->args[0] = token;
   for (int i = 1; i <= len; i++) cmd->args[i] = strtok(NULL, delim);
-
+  cmd->len = len;
   if (next != NULL) cmd->next = parse(next, PATH);
 
   return cmd;
 }
 
-int run(command* cmd, char** PATH) {
+int run(Command* cmd, Path PATH) {
   int parallel = 0;
   while(cmd != NULL) {
     if (fork() == 0) {

@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
+#include "defs.h"
 
 void prompt(void) {
   printf("tash> ");
@@ -29,12 +30,11 @@ int redirect_output(char* file) {
   return 0;
 }
 
-void executable(char* name, char** PATH) {
+void executable(char* name, Path PATH) {
   int ac = -1;
-  int len = sizeof(PATH)/sizeof(char*);
-  for (int i = 0; i < len; i++)  {
+  for (int i = 0; i < PATH.len; i++)  {
     char* ex = malloc(100 * sizeof(char));
-    strcpy(ex, PATH[i]);
+    strcpy(ex, PATH.paths[i]);
     strcat(ex, "/");
     strcat(ex, name);
     ac = access(ex, F_OK);

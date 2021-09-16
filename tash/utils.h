@@ -9,6 +9,6 @@ int redirect_output(char* file);
 
 char* trim(char* line);
 
-void executable(char* name, char** PATH);
+void executable(char* name, Path PATH);
 
 #endif

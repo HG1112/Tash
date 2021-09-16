@@ -1,5 +1,6 @@
+#include "defs.h"
 
-void interactive(char** PATH);
+void interactive(Path PATH);
 
-void batchmode(char* file, char** PATH);
+void batchmode(char* file, Path PATH);
 

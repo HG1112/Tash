@@ -1,7 +1,7 @@
 void texit();
 
-void tcd(command* cmd);
+void tcd(Command* cmd);
 
-void tpath(char** PATH, command* cmd);
+void tpath(Path PATH, Command* cmd);
 
-void builtin(char** PATH, command* cmd);
+void builtin(Path PATH, Command* cmd);
