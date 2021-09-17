@@ -8,8 +8,9 @@
 #include <ctype.h>
 
 // constants
-const char* delim = " \n";
+const char* delim = " \t\n";
 const char* amp = "&";
+const char gt = '>';
 
 // length variables
 int plen = 2;
@@ -17,6 +18,7 @@ int clen = 0;
 
 // paths
 char** paths;
+char* executable(char* line);
 
 // builtin functions
 int tcd(char** cmd);
@@ -30,12 +32,15 @@ int parse_run(char* cmd);
 void interactive();
 void batch(char* file);
 
-//utils
-char* trim(char* line);
-int redirect_output(char* file);
+// shell
+void shell(FILE* file);
+int output(char* file);
 void error();
 void prompt();
-char* executable(char* line);
+
+//utils
+int num_tokens(char* line, const char* delim);
+char* trim(char* line);
 
 
 int texit() {
@@ -65,35 +70,29 @@ int parse_run(char* line) {
   line = trim(line);
   if (*line == 0) return 0;
 
-  char* token = NULL;
-  char*	next = NULL;
-  char** cmd = NULL;
-
-  token = strtok(strdup(line), delim);
+  char* token = strtok(strdup(line), delim);
   if (token == NULL) return -1;
 
   char* ex = executable(token);
   if (ex == NULL) return -1;
 
-  clen = 0;
-  while(token != NULL) {
-    clen++;
-    token = strtok(NULL, delim);
-    if (token != NULL && strcmp(token , amp) == 0) break;
-    next = token;
-  }
+  clen = num_tokens(line, delim);
 
-  cmd = malloc(clen * sizeof(char*));
+  char* redirect = NULL;
+  char** cmd = malloc(clen * sizeof(char*));
   cmd[0] = ex;
-
-  token = strtok(strdup(line), delim);
   int i;
   for (i=1; i < clen; i++) {
     token = strtok(NULL, delim);
+    if (token[0] == gt) {
+      token = strtok(NULL, delim);
+      redirect = token;
+      break;
+    }
     cmd[i] = token;
   }
 
-  int child_pid = -1, ret = 0;
+  int child_pid = 0, ret = 0;
   if (strcmp(ex, "exit") == 0) {
     ret = texit();
   } else if (strcmp(ex, "cd") == 0) {
@@ -102,49 +101,66 @@ int parse_run(char* line) {
     ret = tpath(cmd);
   }  else {
     child_pid = fork();
-    if (child_pid == 0) ret = execv(ex, cmd); 
+    if (child_pid == 0) {
+      if (redirect != NULL) output(redirect);
+      ret = execv(ex, cmd); 
+    } else {
+      ret = child_pid;
+    }
   }
-  if (ret != 0) error();
 
+  return ret;
+}
 
-  if (next != NULL) return parse_run(next);
+void shell(FILE* file) {
+  // read from
+  FILE* fp = stdin;
 
-  int status; 
-  if (child_pid != -1 && waitpid(child_pid, &status, WUNTRACED | WCONTINUED) == -1) return -1;
+  // read line into 
+  char* line = NULL;
+  size_t len = 0;
 
-  return 0;
+  // tokenize line to separate commands
+  char* cmd;
+
+  // stored pids for wait
+  int ret, idx, status;
+  int* pid;
+
+  if (file != NULL) 
+    fp = file;
+  else 
+    prompt();
+
+  if (getline(&line, &len, fp) != -1) {
+    pid = malloc(num_tokens(line, amp) * sizeof(int));
+    cmd = strtok(line, amp);
+    idx = -1;
+    while (cmd != NULL) {
+      ret = parse_run(cmd);
+      if (ret <= -1)
+        error();
+      else if (ret == 0)
+        continue;
+      else 
+        pid[++idx] = ret;
+      cmd = strtok(NULL, amp);
+    }
+
+    for (; idx >= 0; idx--) 
+      if (waitpid(pid[idx], &status, WUNTRACED | WCONTINUED) == -1) error();
+  }
 }
 
 void interactive() {
   while (1)
-  {
-    char* line = NULL;
-    size_t len = 0;
-
-    prompt();
-
-    if (getline(&line, &len, stdin) != -1) {
-        if (parse_run(line) == -1) error();
-    }
-  }
+    shell(NULL);
 }
 
 
 void batch(char* file) {
   if (file != NULL) { 
-    FILE* fp = NULL;
-    char* line = NULL;
-    size_t len = 0;
-
-    fp = fopen(file, "r");
-    if (fp == NULL) {
-      error();
-      exit(1);
-    }
-
-    if (getline(&line, &len, fp) != -1) {
-        if (parse_run(line) == -1) error();
-    }
+    shell(fopen(file, "r"));
   } else {
     error();
     exit(1);
@@ -161,6 +177,16 @@ void error() {
   write(STDERR_FILENO, error_message, strlen(error_message));
 }
 
+int num_tokens(char* line, const char* delim) {
+  int num = 0;
+  char* token = strtok(strdup(line), delim);
+  while (token != NULL) {
+    num++;
+    token = strtok(NULL, amp);
+  }
+  return num;
+}
+
 /* https://stackoverflow.com/questions/122616/how-do-i-trim-leading-trailing-whitespace-in-a-standard-way */
 char* trim(char* line) {
   while(isspace((unsigned char) *line)) line++;
@@ -172,7 +198,7 @@ char* trim(char* line) {
 
 }
 
-int redirect_output(char* file) {
+int output(char* file) {
   close(STDOUT_FILENO);
   return open(file, O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU);
 }
