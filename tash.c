@@ -70,13 +70,13 @@ int parse_run(char* line) {
   line = trim(line);
   if (*line == 0) return 0;
 
+  clen = num_tokens(line, delim);
+
   char* token = strtok(strdup(line), delim);
   if (token == NULL) return -1;
 
   char* ex = executable(token);
   if (ex == NULL) return -1;
-
-  clen = num_tokens(line, delim);
 
   char* redirect = NULL;
   char** cmd = malloc(clen * sizeof(char*));
@@ -84,7 +84,7 @@ int parse_run(char* line) {
   int i;
   for (i=1; i < clen; i++) {
     token = strtok(NULL, delim);
-    if (token[0] == gt) {
+    if (token != NULL && token[0] == gt) {
       token = strtok(NULL, delim);
       redirect = token;
       break;
@@ -134,15 +134,13 @@ void shell(FILE* file) {
 
   if (getline(&line, &len, fp) != -1) {
     pid = malloc(num_tokens(line, amp) * sizeof(int));
-    cmd = strtok(line, amp);
+    cmd = strtok(strdup(line), amp);
     idx = -1;
     while (cmd != NULL) {
       ret = parse_run(cmd);
       if (ret <= -1)
         error();
-      else if (ret == 0)
-        continue;
-      else 
+      else if (ret != 0)
         pid[++idx] = ret;
       cmd = strtok(NULL, amp);
     }
