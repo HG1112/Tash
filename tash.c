@@ -39,8 +39,9 @@ void error();
 void prompt();
 
 //utils
-int num_tokens(char* line, const char* delim);
+int num_tokens(char* line, const char* sep);
 char* trim(char* line);
+char** split(char* line, const char* sep);
 
 
 int texit() {
@@ -65,9 +66,9 @@ int tcd(char** cmd) {
   return chdir(cmd[1]);
 }
 
-int parse_run(char* line) {
+int parse_run(char* command) {
 
-  line = trim(line);
+  char *line = trim(command);
   if (*line == 0) return 0;
 
   clen = num_tokens(line, delim);
@@ -117,36 +118,33 @@ void shell(FILE* file) {
   FILE* fp = stdin;
 
   // read line into 
-  char* line = NULL;
+  char* command = NULL;
   size_t len = 0;
 
-  // tokenize line to separate commands
-  char* cmd;
-
-  // stored pids for wait
-  int ret, idx, status;
-  int* pid;
+  // process variables
+  char** cmds;
+  int* process;
+  int idx , status, ps;
 
   if (file != NULL) 
     fp = file;
   else 
     prompt();
 
-  if (getline(&line, &len, fp) != -1) {
-    pid = malloc(num_tokens(line, amp) * sizeof(int));
-    cmd = strtok(strdup(line), amp);
-    idx = -1;
-    while (cmd != NULL) {
-      ret = parse_run(cmd);
-      if (ret <= -1)
+  if (getline(&command, &len, fp) != -1) {
+    ps = num_tokens(command, amp);
+    process = malloc(ps * sizeof(int));
+    cmds = split(command, amp);
+    for (idx = 0; idx < ps; idx++) process[idx] = parse_run(strdup(cmds[idx]));
+    for (idx = 0; idx < ps; idx++) {
+      if (process[idx] <= -1)
         error();
-      else if (ret != 0)
-        pid[++idx] = ret;
-      cmd = strtok(NULL, amp);
+       else if (process[idx] != 0) {
+         if (waitpid(process[idx], &status, WUNTRACED | WCONTINUED) == -1) error();
+       }
     }
-
-    for (; idx >= 0; idx--) 
-      if (waitpid(pid[idx], &status, WUNTRACED | WCONTINUED) == -1) error();
+    free(process);
+    free(cmds);
   }
 }
 
@@ -175,14 +173,20 @@ void error() {
   write(STDERR_FILENO, error_message, strlen(error_message));
 }
 
-int num_tokens(char* line, const char* delim) {
+int num_tokens(char* line, const char* sep) {
   int num = 0;
-  char* token = strtok(strdup(line), delim);
-  while (token != NULL) {
-    num++;
-    token = strtok(NULL, amp);
-  }
+  char* tk;
+  for (tk = strtok(strdup(line), sep); tk != NULL; tk = strtok(NULL, sep)) num++;
   return num;
+}
+
+char** split(char* line, const char* sep) {
+  int num = num_tokens(line, sep);
+  char* tk;
+  char** result = malloc(num * sizeof(char*));
+  int i = 0;
+  for (tk = strtok(strdup(line), sep); i < num && tk != NULL; tk = strtok(NULL, sep)) result[i++] = tk;
+  return result;
 }
 
 /* https://stackoverflow.com/questions/122616/how-do-i-trim-leading-trailing-whitespace-in-a-standard-way */
