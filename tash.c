@@ -4,13 +4,20 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#include <sys/wait.h>
+#include <pwd.h>
 #include <ctype.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+
+#ifndef MAX_BUF
+#define MAX_BUF 256
+#endif
 
 // constants
-const char* delim = " \t\n";
+const char* whitespace = " \t\n";
 const char* amp = "&";
-const char gt = '>';
+const char* gt = ">";
 
 // length variables
 int plen = 2;
@@ -19,6 +26,7 @@ int clen = 0;
 // paths
 char** paths;
 char* executable(char* line);
+char cwd[MAX_BUF];
 
 // builtin functions
 int tcd(char** cmd);
@@ -39,29 +47,44 @@ void error();
 void prompt();
 
 //utils
+int num_chars(char* line, const char c);
 int num_tokens(char* line, const char* sep);
 char* trim(char* line);
 char** split(char* line, const char* sep);
 
 
 int texit() {
+  if (clen != 1) return -1;
   exit(0);
   return 0;
 }
 
 int tpath(char** cmd) {
   if (clen < 2) return -1;
-  free(paths);
-  plen = clen + 1;
-  paths = malloc(sizeof(char*) * plen);
-  paths[0] = ".";
-  paths[1] = "/bin";
+  char** new_paths = malloc(sizeof(char*) * clen);
+  getcwd(cwd, MAX_BUF);
+  new_paths[0] = cwd;
+  new_paths[1] = "/bin";
   int i;
-  for (i = 1; i < clen; i++) paths[i+1] = cmd[i];
+  for (i = 1; i < clen; i++) {
+    if (access(cmd[i], F_OK) != 0) return -1;
+    new_paths[i+1] = cmd[i];
+  }
+  free(paths);
+  paths = new_paths;
+  plen = clen + 1;
   return 0;
 }
 
 int tcd(char** cmd) {
+  if (clen == 1) {
+    const char* home;
+    if ((home = getenv("HOME")) == NULL) {
+      home = getpwuid(getuid())->pw_dir;
+      return chdir(home);
+    }
+    return -1;
+  }
   if (clen != 2) return -1;
   return chdir(cmd[1]);
 }
@@ -71,27 +94,26 @@ int parse_run(char* command) {
   char *line = trim(command);
   if (*line == 0) return 0;
 
-  clen = num_tokens(line, delim);
-
-  char* token = strtok(strdup(line), delim);
-  if (token == NULL) return -1;
-
-  char* ex = executable(token);
-  if (ex == NULL) return -1;
-
+  char** cmd = NULL;
   char* redirect = NULL;
-  char** cmd = malloc(clen * sizeof(char*));
-  cmd[0] = ex;
-  int i;
-  for (i=1; i < clen; i++) {
-    token = strtok(NULL, delim);
-    if (token != NULL && token[0] == gt) {
-      token = strtok(NULL, delim);
-      redirect = token;
-      break;
-    }
-    cmd[i] = token;
+  if (strchr(line, '>') != NULL) {
+    clen = num_tokens(line, gt);
+    if (clen != 2) return -1;
+    cmd = split(line, gt);
+    redirect = cmd[1];
+    if (num_chars(redirect, ' ') != 0) return -1;
+    line = cmd[0];
   }
+
+  clen = num_tokens(line, whitespace);
+  char* tk;
+  cmd = malloc((clen + 1) * sizeof(char*));
+  int i = 0;
+  for (tk = strtok(strdup(line), whitespace); i < clen && tk != NULL; tk = strtok(NULL, whitespace)) cmd[i++] = tk;
+  cmd[clen] = NULL;
+  char* ex = executable(cmd[0]);
+  if (ex == NULL) return -1;
+  cmd[0] = ex;
 
   int child_pid = 0, ret = 0;
   if (strcmp(ex, "exit") == 0) {
@@ -170,6 +192,15 @@ void error() {
   write(STDERR_FILENO, error_message, strlen(error_message));
 }
 
+int num_chars(char* line, const char c) {
+  if (line == NULL) return 0;
+  int i, num = 0;
+  for (i = 0; line[i]; i++) {
+    if (line[i] == c) num++;
+  }
+  return num;
+}
+
 int num_tokens(char* line, const char* sep) {
   int num = 0;
   char* tk;
@@ -194,7 +225,6 @@ char* trim(char* line) {
   while (last >= line && isspace((unsigned char) *last)) last--;
   last[1] = '\0';
   return line;
-
 }
 
 int output(char* file) {
@@ -204,7 +234,7 @@ int output(char* file) {
 
 char* executable(char* name) {
   if (strcmp(name, "exit") == 0 || strcmp(name, "cd") == 0 || strcmp(name, "path") == 0) {
-    return name;
+    return trim(name);
   } else {
     int ac = -1;
     char* ex = NULL;
@@ -215,7 +245,7 @@ char* executable(char* name) {
       strcat(ex, "/");
       strcat(ex, name);
       ac = access(ex, F_OK);
-      if (ac == 0) return ex;;
+      if (ac == 0) return trim(ex);
       free(ex);
     } 
     return NULL;
@@ -226,7 +256,8 @@ char* executable(char* name) {
 int main(int argc, char** argv) {
 
   paths = malloc(sizeof(char*) * plen);
-  paths[0] = ".";
+  getcwd(cwd, MAX_BUF);
+  paths[0] = cwd;
   paths[1] = "/bin";
 
   if (argc > 2) {
