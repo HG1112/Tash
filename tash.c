@@ -55,7 +55,7 @@ int tpath(char** cmd) {
   plen = clen + 1;
   paths = malloc(sizeof(char*) * plen);
   paths[0] = ".";
-  paths[1] = "";
+  paths[1] = "/bin";
   int i;
   for (i = 1; i < clen; i++) paths[i+1] = cmd[i];
   return 0;
@@ -227,7 +227,7 @@ int main(int argc, char** argv) {
 
   paths = malloc(sizeof(char*) * plen);
   paths[0] = ".";
-  paths[1] = "";
+  paths[1] = "/bin";
 
   if (argc > 2) {
     error();
