@@ -43,7 +43,7 @@ int num_tokens(char* line, const char* sep);
 char* trim(char* line);
 char** split(char* line, const char* sep);
 
-
+//Function to exit the shell
 int texit() {
   exit(0);
   return 0;
@@ -61,12 +61,13 @@ int tpath(char** cmd) {
   return 0;
 }
 
+//Function to change the directory
 int tcd(char** cmd) {
   if (clen != 2) return -1;
   return chdir(cmd[1]);
 }
 
-// to parse the input line
+// to parse the input line and execute the command
 int parse_run(char* command) {
 
   char *line = trim(command);
