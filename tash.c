@@ -33,7 +33,7 @@ void interactive();
 void batch(char* file);
 
 // shell
-void shell(FILE* file);
+void shell(char* command);
 int output(char* file);
 void error();
 void prompt();
@@ -113,50 +113,47 @@ int parse_run(char* command) {
   return ret;
 }
 
-void shell(FILE* file) {
-  // read from
-  FILE* fp = stdin;
+void shell(char* command) {
+    // process variables
+    int ps = num_tokens(command, amp);
+    char** cmds = split(command, amp);
+    int* process = malloc(ps * sizeof(int));
 
-  // read line into 
-  char* command = NULL;
-  size_t len = 0;
-
-  // process variables
-  char** cmds;
-  int* process;
-  int idx , status, ps;
-
-  if (file != NULL) 
-    fp = file;
-  else 
-    prompt();
-
-  if (getline(&command, &len, fp) != -1) {
-    ps = num_tokens(command, amp);
-    process = malloc(ps * sizeof(int));
-    cmds = split(command, amp);
+    int idx , status;
     for (idx = 0; idx < ps; idx++) process[idx] = parse_run(strdup(cmds[idx]));
     for (idx = 0; idx < ps; idx++) {
       if (process[idx] <= -1)
         error();
-       else if (process[idx] != 0) {
-         if (waitpid(process[idx], &status, WUNTRACED | WCONTINUED) == -1) error();
-       }
+      else if (process[idx] != 0) {
+        if (waitpid(process[idx], &status, WUNTRACED | WCONTINUED) == -1) error();
+      }
     }
     free(process);
     free(cmds);
-  }
 }
 
 void interactive() {
-  while (1)
-    shell(NULL);
+  char* command = NULL;
+  size_t len = 0;
+  while(1)
+  {
+    prompt();
+    if (getline(&command, &len, stdin) > 0) shell(command);
+  }
 }
 
 
 void batch(char* file) {
+  char* command = NULL;
+  size_t len = 0;
   if (file != NULL) { 
-    shell(fopen(file, "r"));
+    FILE* fp = fopen(file, "r");
+    if (fp == NULL) 
+    {
+      error();
+      exit(1);
+    }
+    while (getline(&command, &len, fp) > 0) shell(command);
   } else {
     error();
     exit(1);
