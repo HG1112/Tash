@@ -28,7 +28,7 @@ int tpath(char** cmd);
 // parse and run the commands
 int parse_run(char* cmd);
 
-// modes
+// Declaration of two different modes
 void interactive();
 void batch(char* file);
 
@@ -43,7 +43,7 @@ int num_tokens(char* line, const char* sep);
 char* trim(char* line);
 char** split(char* line, const char* sep);
 
-
+//Function to exit the shell
 int texit() {
   exit(0);
   return 0;
@@ -61,11 +61,13 @@ int tpath(char** cmd) {
   return 0;
 }
 
+//Function to change the directory
 int tcd(char** cmd) {
   if (clen != 2) return -1;
   return chdir(cmd[1]);
 }
 
+// to parse the input line and execute the command
 int parse_run(char* command) {
 
   char *line = trim(command);
@@ -113,6 +115,7 @@ int parse_run(char* command) {
   return ret;
 }
 
+//Implementation of Shell of batch and interactive modes
 void shell(FILE* file) {
   // read from
   FILE* fp = stdin;
@@ -163,6 +166,7 @@ void batch(char* file) {
   }
 }
 
+//Prompt message displayed on console
 void prompt() {
   char prompt_message[7] = "tash> ";
   write(STDOUT_FILENO, prompt_message, strlen(prompt_message));
@@ -225,7 +229,7 @@ char* executable(char* name) {
   }
 }
 
-// Main
+// Main Function, Batch and interactive mode are selected based on no of arguments
 int main(int argc, char** argv) {
 
   paths = malloc(sizeof(char*) * plen);
