@@ -9,24 +9,18 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-
-#ifndef MAX_BUF
-#define MAX_BUF 256
-#endif
-
 // constants
 const char* whitespace = " \t\n";
 const char* amp = "&";
 const char* gt = ">";
 
 // length variables
-int plen = 2;
+int plen = 1;
 int clen = 0;
 
 // paths
 char** paths;
 char* executable(char* line);
-char cwd[MAX_BUF];
 
 // builtin functions
 int tcd(char** cmd);
@@ -60,19 +54,15 @@ int texit() {
 }
 
 int tpath(char** cmd) {
-  if (clen < 2) return -1;
-  char** new_paths = malloc(sizeof(char*) * clen);
-  getcwd(cwd, MAX_BUF);
-  new_paths[0] = cwd;
-  new_paths[1] = "/bin";
+  char** new_paths = malloc(sizeof(char*) * (clen-1));
   int i;
-  for (i = 1; i < clen; i++) {
-    if (access(cmd[i], F_OK) != 0) return -1;
-    new_paths[i+1] = cmd[i];
+  for (i = 0; i < clen-1; i++) {
+    if (access(cmd[i+1], F_OK) != 0) return -1;
+    new_paths[i] = cmd[i+1];
   }
   free(paths);
   paths = new_paths;
-  plen = clen + 1;
+  plen = clen-1;
   return 0;
 }
 
@@ -142,7 +132,7 @@ void shell(char* command) {
     int* process = malloc(ps * sizeof(int));
 
     int idx , status;
-    for (idx = 0; idx < ps; idx++) process[idx] = parse_run(strdup(cmds[idx]));
+    for (idx = ps-1; idx >= 0; idx--) process[idx] = parse_run(strdup(cmds[idx]));
     for (idx = 0; idx < ps; idx++) {
       if (process[idx] <= -1)
         error();
@@ -256,9 +246,7 @@ char* executable(char* name) {
 int main(int argc, char** argv) {
 
   paths = malloc(sizeof(char*) * plen);
-  getcwd(cwd, MAX_BUF);
-  paths[0] = cwd;
-  paths[1] = "/bin";
+  paths[0] = "/bin";
 
   if (argc > 2) {
     error();
