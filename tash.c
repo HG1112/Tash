@@ -166,6 +166,10 @@ void batch(char* file) {
       exit(1);
     }
     while (getline(&command, &len, fp) > 0) shell(command);
+
+    // Batch file cannot exit if exit not provided in the script
+    error();
+    exit(1);
   } else {
     error();
     exit(1);
