@@ -90,7 +90,7 @@ int parse_run(char* command) {
     clen = num_tokens(line, gt);
     if (clen != 2) return -1;
     cmd = split(line, gt);
-    redirect = cmd[1];
+    redirect = trim(cmd[1]);
     if (num_chars(redirect, ' ') != 0) return -1;
     line = cmd[0];
   }
@@ -132,7 +132,7 @@ void shell(char* command) {
     int* process = malloc(ps * sizeof(int));
 
     int idx , status;
-    for (idx = ps-1; idx >= 0; idx--) process[idx] = parse_run(strdup(cmds[idx]));
+    for (idx = 0; idx < ps; idx++) process[idx] = parse_run(strdup(cmds[idx]));
     for (idx = 0; idx < ps; idx++) {
       if (process[idx] <= -1)
         error();
@@ -222,8 +222,11 @@ char* trim(char* line) {
 }
 
 int output(char* file) {
-  close(STDOUT_FILENO);
-  return open(file, O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU);
+  fclose(stdout);
+  fclose(stderr);
+  if (freopen(file, "w+", stdout) == NULL) return -1;
+  if (freopen(file, "w+", stderr) == NULL) return -1;
+  return 0;
 }
 
 char* executable(char* name) {
