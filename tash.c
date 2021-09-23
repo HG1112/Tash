@@ -158,8 +158,8 @@ int num_tokens_str(char* line, const char* sep)
 char** split_str(char* line, const char* sep)
 {
     int num = num_tokens_str(line, sep);
-    char* tk;
     char** result = malloc(num * sizeof(char*));
+    char* tk;
     int i = 0;
     for (tk = strtok(strdup(line), sep); i < num && tk != NULL; tk = strtok(NULL, sep)) result[i++] = tk;
     return result;
@@ -284,23 +284,33 @@ int tpath(char** cmd)
  */
 int parse_run(char* command)
 {
-  char *line = strdup(command);
+  char *line = trim(command);
+  if (*line == 0) return 0;
+
   char** cmd = NULL;
 
   // Redirection and its relevant checks
   char* redirect = NULL;
   if (strchr(line, gt) != NULL) {
+
+    // multiple redirection undefined
     clen = num_tokens(line, gt);
     if (clen != 2) return -1;
+
     cmd = split(line, gt);
+    line = trim(cmd[0]);
+
+    // left operand cannot be empty
+    if (*line == 0) return -1;
+
+    // right operand cannot be empty nor should it have spaces in it
     redirect = trim(cmd[1]);
-    if (num_tokens_str(redirect, whitespace) != 1) return -1;
-    line = cmd[0];
+    if (*redirect == 0 || num_tokens_str(redirect, whitespace) != 1) return -1;
   }
 
   // Construction of command as an array of arguments with file path as args[0]
   clen = num_tokens_str(line, whitespace);
-  cmd = malloc((clen + 1) * sizeof(char*));
+  cmd = malloc((clen + 1) * sizeof(int));
   copy(split_str(line, whitespace), cmd, clen);
   cmd[clen] = NULL;
 
