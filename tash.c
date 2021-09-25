@@ -26,11 +26,15 @@ const char gt = '>';
 /**  -------- Global variables ----------  */
 
 /* Length variables for path and command */
-int plen = 1;
-int clen = 0;
 
 /* Placeholder for paths */
 char** paths;
+
+// number of paths stored
+int plen = 1;
+
+// number of args in command provided
+int clen = 0;
 
 /**  -------- STRING utilities ----------  */
 
@@ -91,7 +95,7 @@ char* trim(char* line)
 
 /**
  * @brief return number of tokens after line is split by a separator
- * @param line to be split and separator to be split by
+ * @param line to be split and separator(char to strdup) to be split by
  * @return number of splitted tokens
  */
 int num_tokens(char* line, const char sep)
@@ -111,7 +115,7 @@ int num_tokens(char* line, const char sep)
 
 /**
  * @brief return array of tokens after line is split by a separator
- * @param line to be split and separator to be split by
+ * @param line to be split and separator(char to strdup) to be split by
  * @return array of splitted tokens
  */
 char** split(char* line, const char sep)
@@ -139,7 +143,7 @@ char** split(char* line, const char sep)
 
 /**
  * @brief return number of tokens after line is split by a separator
- * @param line to be split and separator to be split by
+ * @param line to be split and separator(string to strtok) to be split by
  * @return number of splitted tokens
  */
 int num_tokens_str(char* line, const char* sep)
@@ -152,17 +156,17 @@ int num_tokens_str(char* line, const char* sep)
 
 /**
  * @brief return array of tokens after line is split by a separator
- * @param line to be split and separator to be split by
+ * @param line to be split and seperator(string for strtok) to be split by
  * @return array of splitted tokens
  */
 char** split_str(char* line, const char* sep)
 {
-    int num = num_tokens_str(line, sep);
-    char** result = malloc(num * sizeof(char*));
-    char* tk;
-    int i = 0;
-    for (tk = strtok(strdup(line), sep); i < num && tk != NULL; tk = strtok(NULL, sep)) result[i++] = tk;
-    return result;
+  int num = num_tokens_str(line, sep);
+  char** result = malloc(num * sizeof(char*));
+  char* tk;
+  int i = 0;
+  for (tk = strtok(strdup(line), sep); i < num && tk != NULL; tk = strtok(NULL, sep)) result[i++] = tk;
+  return result;
 }
 
 /**
@@ -184,9 +188,14 @@ void copy(char** from , char** to, int size) {
  */
 int output(char* file)
 {
+  // close stdout channel
   fclose(stdout);
+  // close stderr channel
   fclose(stderr);
+
+  // open file as stdout channel
   if (freopen(file, "w+", stdout) == NULL) return -1;
+  // open file as stderr channel
   if (freopen(file, "w+", stderr) == NULL) return -1;
   return 0;
 }
@@ -206,10 +215,14 @@ char* executable(char* name)
     char* ex = NULL;
     int i;
     for (i = 0; i < plen; i++)  {
+
+      // generate path to the executable
       ex = malloc(strlen(paths[i]) + 1 + strlen(name));
       strcpy(ex, paths[i]);
       strcat(ex, "/");
       strcat(ex, name);
+
+      // check whether executable is accessible
       ac = access(ex, F_OK);
       if (ac == 0) return trim(ex);
       free(ex);
@@ -236,7 +249,11 @@ int tcd(char** cmd)
     }
     return -1;
   }
+
+  // throws error if more than 1 argument
   if (clen != 2) return -1;
+
+  // change directory to args[1]
   return chdir(cmd[1]);
 }
 
@@ -268,6 +285,7 @@ int tpath(char** cmd)
     if (access(cmd[i+1], F_OK) != 0) return -1;
     new_paths[i] = cmd[i+1];
   }
+  // free pre-existing paths and load newer ones
   free(paths);
   paths = new_paths;
   plen = clen-1;
@@ -285,6 +303,7 @@ int tpath(char** cmd)
 int parse_run(char* command)
 {
   char *line = trim(command);
+  // skip if empty line given
   if (*line == 0) return 0;
 
   char** cmd = NULL;
@@ -297,6 +316,7 @@ int parse_run(char* command)
     clen = num_tokens(line, gt);
     if (clen != 2) return -1;
 
+    // split to left and right operand of gt i.e '>'
     cmd = split(line, gt);
     line = trim(cmd[0]);
 
@@ -312,7 +332,7 @@ int parse_run(char* command)
   clen = num_tokens_str(line, whitespace);
   cmd = malloc((clen + 1) * sizeof(int));
   copy(split_str(line, whitespace), cmd, clen);
-  cmd[clen] = NULL;
+  cmd[clen] = 0;
 
   // Confirm the existence of executable to run
   char* ex = executable(cmd[0]);
@@ -322,20 +342,21 @@ int parse_run(char* command)
   // Run
   int child_pid = 0, ret = 0;
   if (strcmp(ex, "exit") == 0) {
-    // Built-in functions run in parent process
+    // Built-in function exit run in parent process
     ret = texit();
   } else if (strcmp(ex, "cd") == 0) {
-    // Built-in functions run in parent process
+    // Built-in function cd run in parent process
     ret = tcd(cmd);
   } else if (strcmp(ex, "path") == 0) {
-    // Built-in functions run in parent process
+    // Built-in function path run in parent process
     ret = tpath(cmd);
   }  else {
 
     // Non-built-in functions run in child processes
     child_pid = fork();
     if (child_pid == 0) {
-      // redirect if asked for
+
+      // redirect stdout and stderr if asked for
       if (redirect != NULL) output(redirect);
       ret = execv(ex, cmd); 
     } else {
@@ -355,28 +376,36 @@ int parse_run(char* command)
  */
 void shell(char* command)
 {
-    int ps = num_tokens(command, amp);
-    char** cmds = split(command, amp);
-    int* process = malloc(ps * sizeof(int));
 
-    int idx , status;
-    for (idx = 0; idx < ps; idx++) {
-      cmds[idx] = trim(cmds[idx]);
-      if (idx > 0 && *cmds[idx-1] == 0) {
-        error();
-        return;
-      }
+  // number of processes within command i.e split tokens with amp i.e '&'
+  int ps = num_tokens(command, amp);
+  // array of process commands within command i.e split tokens with amp i.e '&'
+  char** cmds = split(command, amp);
+  // array for return codes for each process
+  int* process = malloc(ps * sizeof(int));
+
+  int idx , status;
+  for (idx = 0; idx < ps; idx++) {
+    cmds[idx] = trim(cmds[idx]);
+    // check whether left operand of amp is non-empty else throw error
+    if (idx > 0 && *cmds[idx-1] == 0) {
+      error();
+      return;
     }
-    for (idx = 0; idx < ps; idx++) process[idx] = parse_run(strdup(cmds[idx]));
-    for (idx = 0; idx < ps; idx++) {
-      if (process[idx] <= -1)
-        error();
-      else if (process[idx] != 0) {
-        if (waitpid(process[idx], &status, WUNTRACED | WCONTINUED) == -1) error();
-      }
+  }
+  for (idx = 0; idx < ps; idx++) process[idx] = parse_run(strdup(cmds[idx]));
+  for (idx = 0; idx < ps; idx++) {
+    // throw error if builtin function fails
+    if (process[idx] <= -1)
+      error();
+    else if (process[idx] != 0) {
+      // wait for any child process forked
+      if (waitpid(process[idx], &status, WUNTRACED | WCONTINUED) == -1) error();
     }
-    free(process);
-    free(cmds);
+  }
+
+  free(process);
+  free(cmds);
 }
 
 /**  -------- Mode ----------  */
@@ -393,6 +422,7 @@ void interactive()
   while(1)
   {
     prompt();
+    // wait for new command and pass it to shell
     if (getline(&command, &len, stdin) > 0) shell(command);
   }
 }
@@ -407,19 +437,25 @@ void batch(char* file)
 {
   char* command = NULL;
   size_t len = 0;
+  // check if proper file has been passed
   if (file != NULL) { 
     FILE* fp = fopen(file, "r");
+    // check whether file can be opened/read
     if (fp == NULL) 
     {
       error();
       exit(1);
     }
+    
+    // pass each line of file as command to shell
     while (getline(&command, &len, fp) > 0) shell(command);
 
     // Batch file cannot exit if exit not provided in the script
     error();
     exit(1);
   } else {
+
+    // throw error if file cannot be found
     error();
     exit(1);
   }
@@ -433,13 +469,18 @@ int main(int argc, char** argv) {
   paths = malloc(sizeof(char*) * plen);
   paths[0] = "/bin";
 
+  // throw error if more than one argument provided
   if (argc > 2) {
     error();
     exit(1);
   }
+
+  // Run in batch mode if one argument provided
   if (argc == 2) {
     batch(argv[1]);
   } else {
+
+    // Run in interactive mode if no argument provided
     interactive();
   }
   return 0;
