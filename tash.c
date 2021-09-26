@@ -232,14 +232,6 @@ char* executable(char* name)
   }
 }
 
-int is_empty(FILE* fp) {
-  fseek (fp, 0, SEEK_END);
-  if (ftell(fp) == 0)
-    return 1;
-  else 
-    return 0;
-}
-
 /**  -------- Builtin functions ----------  */
 
 /**
@@ -441,7 +433,7 @@ void batch(char* file)
   if (file != NULL) { 
     FILE* fp = fopen(file, "r");
     
-    // check file exists and is not empty
+    // check such file exists
     if (fp == NULL) 
     {
       error();
