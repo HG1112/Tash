@@ -10,11 +10,14 @@ described later.
 
 ## Compile & Run
 
+```
 gcc tash.c -o tash -Wall -Werror -O
+
 
 Interactive Mode : ./tash
 
 Batch       Mode : ./tash <path to text with commands>
+```
 
 
 ## Modes
@@ -54,15 +57,21 @@ There are two types of modes to execute the shell
   Exits from the shell using syscall exit
   Does not accept any arguments i.e throws error if any arguments are passed along with exit call
 
-  Syntax : exit
+  Syntax:
+  ```
+    exit
+  ```
 
 #### cd 
   Changes directory from present working directory to path provided as argument ( throws error if
   such path is not accessible)
   if no argument provided, it changes directory to HOME of the user
 
-  Syntax : cd <p1>
-            cd 
+  Syntax :  
+  ```
+    cd <p1>
+    cd
+  ```
 
   Does not accept more than one argument
 
@@ -70,10 +79,14 @@ There are two types of modes to execute the shell
   Overrides the PATH i.e array of search with list of space separated paths provided as arguments
   If no arguments provided , PATH is cleared out and shell will not find executable anywhere
 
-  Syntax : path <p1> <p2> 
-            path
+  Syntax : 
+  ```
+    path <p1> <p2> 
+    path
+  ```
 
 ## Contributors :
 
   Harish Gontu , MSCS UTD
+
   Sharath Nakka, MSCS UTD
