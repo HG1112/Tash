@@ -65,12 +65,10 @@ There are two types of modes to execute the shell
 #### cd 
   Changes directory from present working directory to path provided as argument ( throws error if
   such path is not accessible)
-  if no argument provided, it changes directory to HOME of the user
 
   Syntax :  
   ```
     cd <p1>
-    cd
   ```
 
   Does not accept more than one argument

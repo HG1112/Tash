@@ -1,0 +1,5 @@
+echo hello world
+sleep 4
+ls & ps -u
+cat testcases.txt
+echo hi > output.ext

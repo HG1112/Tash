@@ -1,0 +1,16 @@
+total 688
+-rw------- 1 hxg200007 sn     6 Sep 26 12:22 hello.txt
+-rw------- 1 hxg200007 sn   834 Sep 26 12:23 ls.txt
+-rwx--x--x 1 hxg200007 sn  8408 Sep 23 23:25 myhello
+-rwx--x--x 1 hxg200007 sn  8512 Sep 26 12:16 myls
+-rw------x 1 hxg200007 sn   571 Sep 26 12:15 myls.c
+-rw------- 1 hxg200007 sn   158 Sep 26 12:23 output.ext
+-rw------- 1 hxg200007 sn  2223 Sep 26 12:23 ps.txt
+-rw------- 1 hxg200007 sn    50 Sep 26 12:23 pwd.txt
+-rw------x 1 hxg200007 sn   701 Sep 23 23:25 README
+drwx--x--x 2 hxg200007 sn    92 Sep 26 12:19 test
+-rw------x 1 hxg200007 sn 18505 Sep 23 23:25 testcase-2-longcmd.txt
+-rw------- 1 hxg200007 sn    75 Sep 26 12:21 testcases1.in
+-rw------x 1 hxg200007 sn   887 Sep 23 23:25 testcases.txt
+-rw------- 1 hxg200007 sn     6 Sep 26 12:23 test.txt
+drwx--x--x 2 hxg200007 sn  1557 Sep 26 12:19 xtratestcases

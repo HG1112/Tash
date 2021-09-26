@@ -15,6 +15,7 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 
 /**
  * Constants 
@@ -231,6 +232,14 @@ char* executable(char* name)
   }
 }
 
+int is_empty(FILE* fp) {
+  fseek (fp, 0, SEEK_END);
+  if (ftell(fp) == 0)
+    return 1;
+  else 
+    return 0;
+}
+
 /**  -------- Builtin functions ----------  */
 
 /**
@@ -240,17 +249,7 @@ char* executable(char* name)
  */
 int tcd(char** cmd)
 {
-  if (clen == 1) {
-    // change directory to HOME if no argument provided
-    const char* home;
-    if ((home = getenv("HOME")) == NULL) {
-      home = getpwuid(getuid())->pw_dir;
-      return chdir(home);
-    }
-    return -1;
-  }
-
-  // throws error if more than 1 argument
+  // throws error if less than 1 or more than 1 argument
   if (clen != 2) return -1;
 
   // change directory to args[1]
@@ -437,22 +436,31 @@ void batch(char* file)
 {
   char* command = NULL;
   size_t len = 0;
+  size_t num_lines = 0;
   // check if proper file has been passed
   if (file != NULL) { 
     FILE* fp = fopen(file, "r");
-    // check whether file can be opened/read
+    
+    // check file exists and is not empty
     if (fp == NULL) 
     {
       error();
       exit(1);
     }
-    
-    // pass each line of file as command to shell
-    while (getline(&command, &len, fp) > 0) shell(command);
 
-    // Batch file cannot exit if exit not provided in the script
-    error();
-    exit(1);
+    // pass each line of file as command to shell
+    while (getline(&command, &len, fp) > 0) {
+      shell(command);
+      num_lines++;
+    }
+
+    // throw error if empty file
+    if (!num_lines) 
+    {
+      error();
+      exit(1);
+    }
+
   } else {
 
     // throw error if file cannot be found

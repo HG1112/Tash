@@ -1,0 +1,29 @@
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+hxg2000+ 10716  4.0  0.0 166160  2084 pts/5    R    12:23   0:00 /bin/ps -u
+hxg2000+ 10720  2.0  0.0 166160  2036 pts/5    R    12:23   0:00 /bin/ps -u
+hxg2000+ 10723  0.0  0.0 142564  1384 pts/5    D    12:23   0:00 /bin/ls -l
+hxg2000+ 10725  2.0  0.0 166160  2036 pts/5    R    12:23   0:00 /bin/ps -u
+hxg2000+ 10727  0.0  0.0 108068   616 pts/5    D    12:23   0:00 /bin/pwd
+hxg2000+ 10729  0.0  0.0 142556  1404 pts/5    D    12:23   0:00 /bin/ls -l
+hxg2000+ 10730  1.0  0.0 166160  2036 pts/5    R    12:23   0:00 /bin/ps -u
+hxg2000+ 10731  0.0  0.0   4488   292 pts/5    D    12:23   0:00 ../tash testcase-2-longcmd.txt
+hxg2000+ 10733  0.0  0.0   4488   292 pts/5    D    12:23   0:00 ../tash testcase-2-longcmd.txt
+hxg2000+ 10744  2.0  0.0 166160  2036 pts/5    R    12:23   0:00 /bin/ps -u
+hxg2000+ 10747  0.0  0.0 142564  1384 pts/5    D    12:23   0:00 /bin/ls -l
+hxg2000+ 10748  2.0  0.0 166160  2044 pts/5    R    12:23   0:00 /bin/ps -u
+hxg2000+ 10751  0.0  0.0 123264   948 pts/5    R    12:23   0:00 /bin/ls -l
+hxg2000+ 11851  0.0  0.0 127472  3516 pts/1    Ss   10:27   0:00 -bash
+hxg2000+ 20586  0.0  0.0 127472  3556 pts/5    Ss+  11:38   0:00 -bash
+hxg2000+ 23765  0.0  0.0 161880  7316 pts/1    S+   10:32   0:00 vim tash.c
+11:38   0:00 -bash
+hxg2000+ 23765  0.0  0.0 161880  7316 pts/1    S+   10:32   0:00 vim tash.c
+ts/5    R    12:23   0:00 /bin/ps -u
+hxg2000+ 10747  0.0  0.0   4488   300 pts/5    D    12:23   0:00 ../tash testcase-2-longcmd.txt
+hxg2000+ 10748  0.0  0.0   4488   300 pts/5    D    12:23   0:00 ../tash testcase-2-longcmd.txt
+hxg2000+ 10749  0.0  0.0   4488   300 pts/5    D    12:23   0:00 ../tash testcase-2-longcmd.txt
+hxg2000+ 10750  0.0  0.0   4488   300 pts/5    D    12:23   0:00 ../tash testcase-2-longcmd.txt
+hxg2000+ 10751  0.0  0.0   4488   300 pts/5    D    12:23   0:00 ../tash testcase-2-longcmd.txt
+hxg2000+ 11851  0.0  0.0 127472  3516 pts/1    Ss   10:27   0:00 -bash
+hxg2000+ 20586  0.0  0.0 127472  3556 pts/5    Ss+  11:38   0:00 -bash
+hxg2000+ 23765  0.0  0.0 161880  7316 pts/1    S+   10:32   0:00 vim tash.c
+hxg2000+ 23765  0.0  0.0 161880  7316 pts/1    S+   10:32   0:00 vim tash.c
